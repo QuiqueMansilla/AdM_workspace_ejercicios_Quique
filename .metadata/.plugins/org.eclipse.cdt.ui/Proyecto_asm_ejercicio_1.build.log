@@ -1,0 +1,17 @@
+20:23:19 **** Incremental Build of configuration Debug for project Proyecto_asm_ejercicio_1 ****
+make -j4 all 
+arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -I"D:/Especializacion Sistemas Embebidos/AdM_workspace_ejercicios/Proyecto_asm_ejercicio_1/Core/Inc" -x assembler-with-cpp -MMD -MP -MF"Core/Src/asm_zeros.d" -MT"Core/Src/asm_zeros.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/asm_zeros.o" "../Core/Src/asm_zeros.S"
+arm-none-eabi-gcc -o "Proyecto_asm_ejercicio_1.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\Especializacion Sistemas Embebidos\AdM_workspace_ejercicios\Proyecto_asm_ejercicio_1\STM32F413ZHTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Proyecto_asm_ejercicio_1.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Proyecto_asm_ejercicio_1.elf
+ 
+arm-none-eabi-size   Proyecto_asm_ejercicio_1.elf 
+arm-none-eabi-objdump -h -S  Proyecto_asm_ejercicio_1.elf  > "Proyecto_asm_ejercicio_1.list"
+   text	   data	    bss	    dec	    hex	filename
+  11928	     20	   2932	  14880	   3a20	Proyecto_asm_ejercicio_1.elf
+Finished building: default.size.stdout
+ 
+Finished building: Proyecto_asm_ejercicio_1.list
+ 
+
+20:23:20 Build Finished. 0 errors, 0 warnings. (took 876ms)
+
