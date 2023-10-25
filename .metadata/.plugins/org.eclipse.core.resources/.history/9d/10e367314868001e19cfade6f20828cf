@@ -1,0 +1,61 @@
+.syntax unified
+.thumb
+.text
+
+@ Simbolos exportados --> No olvidar de colocar los nombres de las funciones aquí
+.global asm_max
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ Prototipo en "C":
+@   int32_t asm_max (int32_t * vectorIn, uint32_t longitud);
+@
+@ Parametros recibidos:
+@   r0: vector_in
+@   r1: longitud
+@   r2:
+@   r3:
+@
+.thumb_func
+    asm_max:
+    	@ Guardas de seguridad. Tener mas en cuenta para divisiones por 0
+    	// cbz r0, exit_asm_max
+    	// cbz r1, exit_asm_max
+    	push {r4} @ mando al stack r4 (variable auxiliar)
+    	subs r1, #1 @ Decremento en uno el "contador" (longitud) y afecto flag Zero
+
+    	ldr r2, [r0, r1, LSL #2] @ Guardo en r2 (mayor valor) *(r0 + (r1<<4)) = r2
+    							 @ LSL #2 desplazamiento de 4 bytes
+    	mov r4, r1				 @ guardo en r4 el valor de r1 (indice del vector)
+
+    	loop_asm_max:
+    		subs r1, #1 @ Decremento en uno el "contador" (longitud) y afecto flag Zero
+
+    		ldr r3, [r0, r1, LSL #2] @ Guardo en r3 (auxiliar) *(r0 + (r1<<4)) = r3
+    								 @ LSL #2 desplazamiento de 4 bytes
+			cmp r2, r3 				 @ comparo (r2 - r3)
+									 @ si el nuevo valor (r3) es mayor, el resiltado dará negativo
+									 @ independientemente del signo de r2 y r3
+			itt mi					 @ si la comparacion da negativo (es mayor)
+			movmi r2, r3			 @ guardo el nuevo valor en r2 (que contendra siempre el mayor valor)
+			movmi r4, ri			 @ y guardo el valor del indice en r4
+			cbz r1, exit_max1		 @ compara y salta a exit_max1 si ri llega a cero
+			b loop_asm_max			 @ si no, retorna al inicio de loop_asm_max
+
+		exit_max1:
+			mov r0, r4		@ salva en r0 el indice (posición) del maximo valor
+			pop {r4} @ recupero del stack el valor de r4
+
+    	exit_asm_max:
+	        bx lr       @ vuelve adonde fue llamada (especificamente, si "pc"
+	                    @ es la direccion, en el codigo del programa, de la
+	                    @ instruccion "bl asm_sum" usada para saltar a
+	                    @ esta funcion, entonces "lr" contiene ese "pc" + 4).
+	                    @ el valor de retorno debe quedar en el registro r0.
+	                    @ En este caso, r0 es el resultado de r0 + r1.
+
+        @ Otras alternativas para el retorno
+        @ mov pc,lr
+        @ bx lr
+        @ push {lr} ... pop {pc}
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

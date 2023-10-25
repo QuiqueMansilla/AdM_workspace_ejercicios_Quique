@@ -1,0 +1,9 @@
+../Core/Src/main.c:80:5:main	96	dynamic
+../Core/Src/main.c:141:6:SystemClock_Config	88	static
+../Core/Src/main.c:188:13:MX_USART3_UART_Init	8	static
+../Core/Src/main.c:221:13:MX_USB_OTG_FS_PCD_Init	8	static
+../Core/Src/main.c:257:13:MX_GPIO_Init	56	static
+../Core/Src/main.c:309:13:downsampleM	40	static
+../Core/Src/main.c:331:16:max	32	static
+../Core/Src/main.c:347:13:productoEscalar16	32	static
+../Core/Src/main.c:387:6:Error_Handler	4	static,ignoring_inline_asm

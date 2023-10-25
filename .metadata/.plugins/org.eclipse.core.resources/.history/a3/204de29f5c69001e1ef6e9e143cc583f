@@ -1,0 +1,54 @@
+.syntax unified
+.thumb
+.text
+
+@ Simbolos exportados --> No olvidar de colocar los nombres de las funciones aquí
+.global asm_potencia
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ Prototipo en "C":
+@   uint32_t asm_potencia (int16_t * vectorIn, uint32_t longitud);
+@
+@ Parametros recibidos:
+@   r0: vector_in
+@   r1: longitud
+@   r2:
+@   r3:
+@
+.thumb_func
+    asm_potencia:
+    	@ Guardas de seguridad. Tener mas en cuenta para divisiones por 0
+    	// cbz r0, exit_asm_promedio
+    	// cbz r1, exit_asm_promedio
+    	push {r4, r5} 	  @ mando al stack r4 (variable auxiliar)
+    	mov r4, #0	  @ guardo en r4 el valor de 0 (para iniciar la suma)
+		mov r5, r1	  @	guardo en r5 el valor de longitur del vector
+
+
+    	loop_asm_potencia:
+    		subs r1, #1 @ Decremento en uno el "contador" (longitud) y afecto flag Zero
+			ldrh r2, [r0, r1, LSL #1] @ Guardo en r2 *(r0 + (r1<<2)) = r2
+    							 	 @ LSL #1 desplazamiento de 2 bytes
+    		mul r3, r2, r2			 @ r3 = r2*r2 (r3 contiene el valor de la potencia)
+    		add r4, r3				 @ r4 = r4 + r3 (r4 contiene el valor de la suma de las potencias)
+    		cbz r1, exit_potencia	 @ compara y salta a exit_max1 si r1 llega a cero
+			b loop_asm_potencia		 @ si no, retorna al inicio de loop_asm_promedio
+
+		exit_potencia:
+			sdiv r0, r4, r5 		@ salva en r0 el promedio que retornara la funcion
+			pop {r4, r5} @ recupero del stack el valor de r4
+
+    	exit_asm_potencia:
+	        bx lr       @ vuelve adonde fue llamada (especificamente, si "pc"
+	                    @ es la direccion, en el codigo del programa, de la
+	                    @ instruccion "bl asm_sum" usada para saltar a
+	                    @ esta funcion, entonces "lr" contiene ese "pc" + 4).
+	                    @ el valor de retorno debe quedar en el registro r0.
+	                    @ En este caso, r0 es el resultado de r0 + r1.
+
+        @ Otras alternativas para el retorno
+        @ mov pc,lr
+        @ bx lr
+        @ push {lr} ... pop {pc}
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

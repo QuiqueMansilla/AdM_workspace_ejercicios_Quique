@@ -1,0 +1,63 @@
+.syntax unified
+.thumb
+.text
+
+@ Simbolos exportados --> No olvidar de colocar los nombres de las funciones aquí
+.global asm_pack32to16
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ Prototipo en "C":
+@   void asm_pack32to16(int32_t *vectorIn, int16_t *vectorOut, uint32_t longitud)
+@
+@ Parametros recibidos:
+@   r0: vectorIn
+@   r1: vectorOut
+@   r2: longitud
+@
+@parametro de la funcion
+@	r3: auxiliar 1
+@	r4: auxiliar 2
+@
+.thumb_func
+    asm_pack32to16:
+    	@ Guardas de seguridad. Tener mas en cuenta para divisiones por 0
+    	// cbz r0, exit_pack32to16
+    	// cbz r1, exit_pack32to16
+    	// cbz r2, exit_pack32to16
+    	push {r4} @ mando al stack r4 (variable auxiliar)
+		sub r2, #1 @ Decremento en uno el "contador" (longitud) para ubicarme en el ultimo elemento
+
+    	loop_pack32to16:
+
+
+    		ldr r3, [r0, r2, LSL #2]  @ Guardo en r3 (auxiliar) *(r0 + (r2<<4)) = r4
+    								  @ LSL #2 desplazamiento de 4 bytes
+			cmp r3, #0	@ comparo con 0 para ver si es positivo o negativo
+			ite mi      @ si es negativo ejecuta linea siguiente si la saltea y ejecuta la proxima
+			asrmi r4, r3, 16 @ r4 = r3 >> 16 bits (guarda el half mas alto de r3 en r4)si es negativo
+							 @ hace un shift aritmetico insertando 1s en el halfword mas alto
+			lsrpl r4, r3, 16 @ r4 = r3 >> 16 bits (guarda el half mas alto de r3 en r4)si es positivo
+							 @ hace un shift lógico insertando 0s en el halfword mas alto
+			strh r4, [r1, r2, LSL #1] @ r4 --> *(r1 +r2<<2) carga el vector de salida: escribo
+    		 						 @ el contenido de r4 en r1 en el elemento correspondiente en el
+    								 @ vector de salida) desplazamiento LSL #1 es de a dos bytes
+    								 @ porque estamos con 16 bits, por eso usamos strh
+    		subs r2, #1		@ decremento en 1 en contador del indice de vector y afecto el flaf Zero
+	   		bne loop_pack32to16 @ cuando "subs" hace llegar a 0 en valor de r2 se activa
+    							@ el flag Zero y "bne" sale del loop
+
+
+		pop {r4} @ recupero del stack el valor de r4
+   	    bx lr       @ vuelve adonde fue llamada (especificamente, si "pc"
+                    @ es la direccion, en el codigo del programa, de la
+                    @ instruccion "bl asm_sum" usada para saltar a
+                    @ esta funcion, entonces "lr" contiene ese "pc" + 4).
+                    @ el valor de retorno debe quedar en el registro r0.
+                    @ En este caso, r0 es el resultado de r0 + r1.
+
+        @ Otras alternativas para el retorno
+        @ mov pc,lr
+        @ bx lr
+        @ push {lr} ... pop {pc}
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

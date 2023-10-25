@@ -1,0 +1,28 @@
+12:13:42 **** Incremental Build of configuration Debug for project Proyecto_asm_ejercicio_7 ****
+make -j4 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F413xx -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:113:11: warning: variable 'posicion_asm' set but not used [-Wunused-but-set-variable]
+  113 |   int32_t posicion_asm;
+      |           ^~~~~~~~~~~~
+../Core/Src/main.c:112:11: warning: variable 'posicion_C' set but not used [-Wunused-but-set-variable]
+  112 |   int32_t posicion_C;
+      |           ^~~~~~~~~~
+At top level:
+../Core/Src/main.c:320:13: warning: 'productoEscalar16' defined but not used [-Wunused-function]
+  320 | static void productoEscalar16 (uint16_t * vectorIn, uint16_t * vectorOut,
+      |             ^~~~~~~~~~~~~~~~~
+arm-none-eabi-gcc -o "Proyecto_asm_ejercicio_7.elf" @"objects.list"   -mcpu=cortex-m4 -T"D:\Especializacion Sistemas Embebidos\AdM_workspace_ejercicios\Proyecto_asm_ejercicio_7\STM32F413ZHTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Proyecto_asm_ejercicio_7.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Proyecto_asm_ejercicio_7.elf
+ 
+arm-none-eabi-size   Proyecto_asm_ejercicio_7.elf 
+arm-none-eabi-objdump -h -S  Proyecto_asm_ejercicio_7.elf  > "Proyecto_asm_ejercicio_7.list"
+   text	   data	    bss	    dec	    hex	filename
+  12016	     20	   2932	  14968	   3a78	Proyecto_asm_ejercicio_7.elf
+Finished building: default.size.stdout
+ 
+Finished building: Proyecto_asm_ejercicio_7.list
+ 
+
+12:13:43 Build Finished. 0 errors, 3 warnings. (took 1s.78ms)
+

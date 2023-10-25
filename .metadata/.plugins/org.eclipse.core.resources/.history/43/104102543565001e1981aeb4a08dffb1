@@ -1,0 +1,115 @@
+.syntax unified
+.thumb
+.text
+
+@ Simbolos exportados --> No olvidar de colocar los nombres de las funciones aquí
+.global asm_ecovector
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ Prototipo en "C":
+@   void asm_producto_escalar12(uint16_t* vector_in, uint16_t* vector_out,
+@								uint32_t longitud, uint16_t escalar);
+@
+@ Parametros recibidos:
+@   r0: vector_in
+@   r1: vector_out
+@   r2: longitud
+@   r3: escalar
+@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ Prototipo en "C":
+@  void asm_ecovector(int16_t *vectorIn, int16_t *vectorOut, uint32_t longitud,
+@					  uint32_t posicion);
+@
+@ Parametros recibidos:
+@   r0: vector_in
+@   r1: vector_out
+@   r2: longitud
+@   r3: posicion (retardo del eco)
+@
+@ Valor de retorno
+@	void
+@
+
+#define SAMPLE_FREC	44100
+
+.thumb_func
+	asm_ecovector:
+		push {r4-r6} @ r4 auxiliar
+						@ Calcular muestra a partir de donde se inicia el eco --> r4
+						@ La cuenta es  "posicion" = 882 SAMPLEOffset = msegRetardo*SAMPLE_FREC/1000
+		mov r4, #SAMPLE_FREQ  @ r4 será el límite a partir de donde se aplicará el eco
+    	mul r4, r4, r3    	  @	r4 = SAMPLE_FREQ*msegRetardo
+    	mov r3, #1000  // Se recicla r3 --> 1000 por que son milisegundos, y la frecuencia está en segundos
+    	udiv r4, r4, r3  // r4 = r4/1000 (para el ej 10 debería da 882)
+    	sub r2, #1  // longitud = longitud - 1
+    	mov r6, #-1
+
+	loop_ecovector:
+		subs r3, #1
+		ldrsh r4, [r0, r3, LSL #1]
+
+		pop {r4-r6}
+	exit_loop_ecovector:
+	        bx lr       @ vuelve adonde fue llamada (especificamente, si "pc"
+	                    @ es la direccion, en el codigo del programa, de la
+	                    @ instruccion "bl asm_sum" usada para saltar a
+	                    @ esta funcion, entonces "lr" contiene ese "pc" + 4).
+	                    @ el valor de retorno debe quedar en el registro r0.
+	                    @ En este caso, r0 es el resultado de r0 + r1.
+
+        @ Otras alternativas para el retorno
+        @ mov pc,lr
+        @ bx lr
+        @ push {lr} ... pop {pc}
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+.thumb_func
+    asm_producto_escalar12:
+    	@ Guardas de seguridad. Tener mas en cuenta para divisiones por 0
+    	// cbz r0, exit_producto_escalar16
+    	// cbz r1, exit_producto_escalar16
+    	// cbz r2, exit_producto_escalar16
+    	// cbz r3, exit_producto_escalar16
+
+    	push {r4, r5} @ mando al stack r4 (variable auxiliar) y r5 (variable auxiliar saturada)
+
+    	loop_producto_escalar12:
+    		subs r2, #1 @ Decremento en uno el "contador" (longitud) y afecto flag Zero
+
+    		ldrh r4, [r0, r2, LSL #1] @ Guardo en r4 (auxiliar) *(r0 + (r2<<2)) = r4
+    								  @ usamos ldrh porque trabajamos con 16 bits (half word)
+    								  @ LSL #1 desplazamiento de 2 bytes
+
+    		@mul Rd, Rn, Rm -> Rd = Rn*Rm
+    		mul r4, r4, r3 @ r4 = r4*r3 (r3 escalar o factor)
+    		usat r5, #12, r4 @ satura a 12 bits el valor de r4 (16 bits) y lo guarda en r5
+    		strh r5, [r1, r2, LSL #1] @ r5 --> *(r1 + (r2<<2)) (equivalente a decir que escribo
+    								 @ el producto por un escalar, saturado a 12 bits, contenido
+    								 @ en r5 en el elemento correspondiente en el vector de
+    								 @ salida) desplazamiento LSL #1 es de a dos bytes porque
+    								 @estamos con 16 bits por eso usamos strh
+
+    		bne loop_producto_escalar12 @ cuando "subs" hace llegar a 0 en valor de r2 se activa
+    									@ el flag Zero y "bne" sale del loop
+
+
+		pop {r4, r5} @ recupero del stack el valor de r4 y r5
+
+    	exit_producto_escalar12:
+	        bx lr       @ vuelve adonde fue llamada (especificamente, si "pc"
+	                    @ es la direccion, en el codigo del programa, de la
+	                    @ instruccion "bl asm_sum" usada para saltar a
+	                    @ esta funcion, entonces "lr" contiene ese "pc" + 4).
+	                    @ el valor de retorno debe quedar en el registro r0.
+	                    @ En este caso, r0 es el resultado de r0 + r1.
+
+        @ Otras alternativas para el retorno
+        @ mov pc,lr
+        @ bx lr
+        @ push {lr} ... pop {pc}
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

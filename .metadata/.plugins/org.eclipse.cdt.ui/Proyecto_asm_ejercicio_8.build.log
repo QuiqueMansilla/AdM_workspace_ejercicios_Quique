@@ -1,0 +1,10 @@
+13:43:46 **** Incremental Build of configuration Debug for project Proyecto_asm_ejercicio_8 ****
+make -j4 all 
+arm-none-eabi-size   Proyecto_asm_ejercicio_8.elf 
+   text	   data	    bss	    dec	    hex	filename
+  12128	     20	   2932	  15080	   3ae8	Proyecto_asm_ejercicio_8.elf
+Finished building: default.size.stdout
+ 
+
+13:43:46 Build Finished. 0 errors, 0 warnings. (took 507ms)
+
